@@ -1,1 +1,219 @@
 
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batilieu - شركة المقاولات</title>
+    <!-- إضافة رابط مكتبة Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 20px;
+        }
+        header img {
+            width: 150px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        section {
+            padding: 20px;
+        }
+        .services {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .service {
+            background-color: #f3f3f3;
+            padding: 20px;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            text-align: right;
+        }
+        .service h3 {
+            color: #333;
+        }
+        .service p {
+            font-size: 16px;
+            color: #555;
+        }
+        footer {
+            background: #222;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        /* إضافة تنسيق لأيقونات وسائل التواصل */
+        .social-icons {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .social-icons h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .icons-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-icon {
+            font-size: 36px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: #f3f3f3;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-icon:hover {
+            color: #fff;
+            background-color: #3498db;
+            transform: translateY(-5px);
+        }
+
+        .social-icon:active {
+            transform: translateY(0);
+        }
+
+        /* استجابة لتصميم الأجهزة المحمولة */
+        @media screen and (max-width: 768px) {
+            .icons-container {
+                flex-direction: column;
+            }
+
+            .service {
+                width: 100%;
+            }
+        }
+
+        /* إضافة تنسيق للصور */
+        .gallery img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin: 10px;
+            border-radius: 10px;
+        }
+
+        /* إضافة تنسيق للفيديو */
+        .video iframe {
+            width: 100%;
+            max-width: 500px;
+            height: 280px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="1.png" alt="لوجو Batilieu">
+        <h1>شركة Batilieu للمقاولات</h1>
+    </header>
+
+    <section>
+        <h2>من نحن</h2>
+        <p>نحن شركة Batilieu، متخصصون في أعمال المقاولات العامة والبناء بأعلى معايير الجودة.</p>
+    </section>
+
+    <section class="services">
+        <h2>خدماتنا</h2>
+
+        <div class="service">
+            <i class="fas fa-hammer fa-2x"></i>
+            <h3>أعمال البناء والتشييد</h3>
+            <p>نحن متخصصون في تقديم حلول البناء الشاملة من الأساسات حتى التشطيبات، مع التركيز على الجودة والالتزام بالمواعيد.</p>
+        </div>
+
+        <div class="service">
+            <i class="fas fa-tools fa-2x"></i>
+            <h3>إعادة تأهيل المباني</h3>
+            <p>نقوم بإعادة تأهيل المباني القديمة وتجديدها وفقًا للمعايير الحديثة، مع الحفاظ على الطابع الأصلي للمبنى.</p>
+        </div>
+
+        <div class="service">
+            <i class="fas fa-paint-roller fa-2x"></i>
+            <h3>التشطيبات الداخلية للمبنى</h3>
+            <p>نحن متخصصون في أعمال التشطيبات الداخلية من الدهانات، الأرضيات، الأسقف، والديكورات.</p>
+        </div>
+
+        <div class="service">
+            <i class="fas fa-home fa-2x"></i>
+            <h3>التشطيبات الخارجية للمبنى</h3>
+            <p>نقوم بتصميم وتنفيذ التشطيبات الخارجية التي تضفي جمالية وقوة للمبنى.</p>
+        </div>
+
+        <div class="service">
+            <i class="fas fa-wrench fa-2x"></i>
+            <h3>التمديدات والصيانة</h3>
+            <p>نقدم خدمات تمديد الشبكات مثل الكهرباء والمياه والصرف الصحي، بالإضافة إلى خدمات الصيانة الوقائية للمباني.</p>
+        </div>
+    </section>
+
+    <section class="gallery">
+        <h2>معرض الصور</h2>
+        <img src="image1.jpg" alt="صورة 1">
+        <img src="image2.jpg" alt="صورة 2">
+        <img src="image3.jpg" alt="صورة 3">
+    </section>
+
+    <section class="video">
+        <h2>الفيديوهات</h2>
+        <iframe src="https://www.youtube.com/embed/yourvideoID" allowfullscreen></iframe>
+    </section>
+
+    <section class="social-icons">
+       
+                                 <h3>تابعنا وتواصل معنا عبر
+                      ،👇</h3>
+
+        <div class="icons-container">
+            <!-- أيقونة فيسبوك -->
+            <a href="https://www.facebook.com" target="_blank" class="social-icon">
+                <i class="fab fa-facebook-square"></i>
+            </a>
+            <!-- أيقونة واتساب -->
+            <a href="https://wa.me/yourphonenumber" target="_blank" class="social-icon">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <!-- أيقونة البريد الإلكتروني -->
+            <a href="mailto:youremail@example.com" target="_blank" class="social-icon">
+                <i class="fas fa-envelope"></i>
+            </a>
+            <!-- أيقونة الخريطة (خرائط جوجل) -->
+            <a href="https://www.google.com/maps" target="_blank" class="social-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2024 جميع الحقوق محفوظة - شركة Batilieu</p>
+    </footer>
+
+</body>
+  </html>
