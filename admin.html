@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin | Modifier site Batilieu</title>
+  <script>
+    const PASSWORD = "batilieu123";
+    function login() {
+      const pass = prompt("Entrez le mot de passe:");
+      if (pass !== PASSWORD) {
+        alert("Mot de passe incorrect !");
+        window.location.href = "/";
+      }
+    }
+    window.onload = login;
+  </script>
+</head>
+<body>
+  <h2>Modifier le contenu du site</h2>
+  <textarea id="json-data" style="width:90%; height:300px;"></textarea><br>
+  <button onclick="saveData()">Enregistrer</button>
+
+  <script>
+    const REPO = "yourusername/yourrepo"; // ← غيّره باسمك الحقيقي
+    const FILE = "data.json";
+    const TOKEN = "199124"; // ← توكن GitHub الشخصي
+
+    fetch(`https://raw.githubusercontent.com/${REPO}/main/${FILE}`)
+      .then(res => res.text())
+      .then(text => {
+        document.getElementById("json-data").value = text;
+      });
+
+    function saveData() {
+      const content = btoa(unescape(encodeURIComponent(document.getElementById("json-data").value)));
+      fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `token ${TOKEN}`
+        }
+      })
+      .then(res => res.json())
+      .then(file => {
+        fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: "Mise à jour du contenu",
+            content: content,
+            sha: file.sha
+          })
+        })
+        .then(() => alert("Mise à jour réussie !"))
+        .catch(() => alert("Erreur lors de l'enregistrement."));
+      });
+    }
+  </script>
+</body>
+</html>
