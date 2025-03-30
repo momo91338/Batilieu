@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم Batilieu</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     body { font-family: sans-serif; background-color: #111; color: #fff; padding: 20px; }
     section { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
@@ -15,139 +16,81 @@
     .service { border-bottom: 1px solid #555; margin-bottom: 15px; padding-bottom: 10px; }
   </style>
 </head>
-<body>
-
-  <script>
-    const PASSWORD = "batilieu123";
-    if (prompt("أدخل كلمة المرور للدخول إلى لوحة التحكم:") !== PASSWORD) {
-      alert("كلمة المرور غير صحيحة!");
-      window.location.href = "/";
-    }
-  </script>
-
-  <h1>لوحة تحكم موقع Batilieu</h1>
-
-  <section>
+<body>  <h1>لوحة تحكم موقع Batilieu</h1>  <section>
     <h2>اسم الموقع</h2>
     <input type="text" id="siteName" placeholder="اسم الموقع" />
-  </section>
-
-  <section>
+  </section>  <section>
     <h2>عن الشركة</h2>
     <textarea id="about" rows="4" placeholder="نص عن الشركة"></textarea>
-  </section>
-
-  <section>
+  </section>  <section>
     <h2>الخدمات</h2>
     <div id="services"></div>
     <button onclick="addService()">+ إضافة خدمة</button>
-  </section>
-
-  <section>
+  </section>  <section>
     <h2>معرض الصور</h2>
     <div class="gallery" id="gallery"></div>
-    <input type="file" onchange="uploadMedia(this, 'image')" />
-  </section>
-
-  <section>
+  </section>  <section>
     <h2>الفيديو</h2>
-    <video id="video" controls width="300"></video>
-    <input type="file" onchange="uploadMedia(this, 'video')" />
-  </section>
-
-  <section>
+    <input type="url" id="video" placeholder="رابط الفيديو (من Cloudinary)" />
+  </section>  <section>
     <h2>روابط التواصل</h2>
     <input type="url" id="facebook" placeholder="رابط فيسبوك" />
     <input type="url" id="whatsapp" placeholder="رابط واتساب" />
     <input type="email" id="email" placeholder="البريد الإلكتروني" />
     <input type="url" id="map" placeholder="رابط خريطة Google" />
-  </section>
-
-  <section>
+  </section>  <section>
     <h2>حقوق الفوتر</h2>
     <input type="text" id="footer" placeholder="مثال: © 2024 Batilieu" />
-  </section>
-
-  <button onclick="saveChanges()">حفظ التعديلات وتحميل data.json</button>
+  </section><button onclick="saveChanges()">حفظ البيانات إلى Firebase</button>
 
   <script>
-    const CLOUD_NAME = "droa7sy8o"; // غيّرها إلى اسم حسابك في Cloudinary
-    const UPLOAD_PRESET = "unsigned_preset"; // غيّرها إذا كنت أنشأت preset مختلف
+    const firebaseConfig = {
+      apiKey: "AIzaSyAjZlsPWS2r4O-dJcdyesQgl0yCpuxlEAU",
+      authDomain: "batilieu-78862.firebaseapp.com",
+      projectId: "batilieu-78862",
+      storageBucket: "batilieu-78862.firebasestorage.app",
+      messagingSenderId: "99288585792",
+      appId: "1:99288585792:web:f78d3fd0174c6b9f4bf1a5",
+      measurementId: "G-8Z3WZF47YP",
+      databaseURL: "https://batilieu-78862-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     function addService(service = { title: "", desc: "" }) {
       const container = document.getElementById("services");
       const div = document.createElement("div");
       div.className = "service";
-      div.innerHTML = `
-        <input placeholder="عنوان الخدمة" value="${service.title}" />
-        <textarea placeholder="وصف الخدمة">${service.desc}</textarea>
-        <button onclick="this.parentElement.remove()">حذف</button>
-      `;
-      container.appendChild(div);
-    }
+      div.innerHTML = `<input placeholder="عنوان الخدمة" value="${service.title}" />
+                       <textarea placeholder="وصف الخدمة">${service.desc}</textarea><button onclick="this.parentElement.remove()">حذف</button>`;
+  container.appendChild(div);
+}
 
-    function uploadMedia(input, type) {
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", UPLOAD_PRESET);
+function saveChanges() {
+  const siteName = document.getElementById("siteName").value;
+  const about = document.getElementById("about").value;
+  const footer = document.getElementById("footer").value;
+  const video = document.getElementById("video").value;
 
-      fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (type === 'image') {
-          const img = document.createElement("img");
-          img.src = data.secure_url;
-          img.onclick = () => img.remove();
-          document.getElementById("gallery").appendChild(img);
-        } else {
-          document.getElementById("video").src = data.secure_url;
-        }
-      });
-    }
+  const services = Array.from(document.getElementById("services").children).map(s => ({
+    title: s.querySelector("input").value,
+    desc: s.querySelector("textarea").value
+  }));
 
-    function saveChanges() {
-      const siteName = document.getElementById("siteName").value;
-      const about = document.getElementById("about").value;
-      const footer = document.getElementById("footer").value;
-      const video = document.getElementById("video").src;
-      const galleryImgs = Array.from(document.getElementById("gallery").getElementsByTagName("img"));
-      const gallery = galleryImgs.map(img => img.src);
-      const serviceEls = document.getElementById("services").children;
-      const services = Array.from(serviceEls).map(el => ({
-        title: el.querySelector("input").value,
-        desc: el.querySelector("textarea").value
-      }));
+  const gallery = Array.from(document.querySelectorAll("#gallery img")).map(img => img.src);
 
-      const social = {
-        facebook: document.getElementById("facebook").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        email: document.getElementById("email").value,
-        map: document.getElementById("map").value
-      };
+  const social = {
+    facebook: document.getElementById("facebook").value,
+    whatsapp: document.getElementById("whatsapp").value,
+    email: document.getElementById("email").value,
+    map: document.getElementById("map").value
+  };
 
-      const result = {
-        siteName,
-        about,
-        footer,
-        video,
-        gallery,
-        services,
-        social
-      };
+  const content = { siteName, about, footer, video, gallery, services, social };
+  db.ref("siteData").set(content).then(() => alert("تم حفظ البيانات بنجاح"));
+}
 
-      const json = JSON.stringify(result, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "data.json";
-      a.click();
-    }
   </script>
-
 </body>
 </html>
