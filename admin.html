@@ -1,188 +1,133 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم Batilieu</title>
-
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
   <style>
-    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
-    section, .login-box { background: #222; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border: none; border-radius: 5px; }
-    input, textarea { background: #333; color: #fff; }
-    button { background: #3498db; color: #fff; cursor: pointer; }
-    button:hover { background: #2980b9; }
+    body { font-family: sans-serif; background-color: #111; color: #fff; padding: 20px; }
+    section, .login-box { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
+    input, textarea, button { width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 5px; }
+    input, textarea { background-color: #333; color: #fff; }
+    button { background-color: #3498db; color: white; cursor: pointer; margin-top: 15px; }
     .gallery img { width: 100px; margin: 5px; border-radius: 5px; cursor: pointer; }
-    .service { margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 10px; }
+    .service { border-bottom: 1px solid #555; margin-bottom: 15px; padding-bottom: 10px; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
-
-  <!-- شاشة تسجيل الدخول -->
   <div id="loginBox" class="login-box">
     <h2>تسجيل الدخول</h2>
     <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" />
     <input type="password" id="loginPassword" placeholder="كلمة المرور" />
     <button onclick="login()">دخول</button>
-  </div>
-
-  <!-- لوحة التحكم بعد الدخول -->
-  <div id="adminPanel" class="hidden">
+  </div>  <div id="adminPanel" class="hidden">
     <h1>لوحة تحكم Batilieu</h1>
-    <button onclick="logout()">تسجيل الخروج</button>
+    <button onclick="logout()">تسجيل الخروج</button><section><h2>اسم الموقع</h2><input id="siteName" /></section>
+<section><h2>عن الشركة</h2><textarea id="about" rows="4"></textarea></section>
 
-    <section>
-      <h2>اسم الموقع</h2>
-      <input id="siteName" placeholder="اسم الموقع" />
-    </section>
+<section>
+  <h2>الخدمات</h2>
+  <div id="services"></div>
+  <button onclick="addService()">+ خدمة</button>
+</section>
 
-    <section>
-      <h2>عن الشركة</h2>
-      <textarea id="about" rows="4"></textarea>
-    </section>
+<section>
+  <h2>المعرض</h2>
+  <div id="gallery" class="gallery"></div>
+  <input type="url" id="imageInput" placeholder="رابط صورة" />
+  <button onclick="addImage()">إضافة صورة</button>
+</section>
 
-    <section>
-      <h2>الخدمات</h2>
-      <div id="services"></div>
-      <button onclick="addService()">+ إضافة خدمة</button>
-    </section>
+<section><h2>الفيديو</h2><input id="video" /></section>
+<section>
+  <h2>روابط التواصل</h2>
+  <input id="facebook" placeholder="فيسبوك" />
+  <input id="whatsapp" placeholder="واتساب" />
+  <input id="email" placeholder="بريد إلكتروني" />
+  <input id="map" placeholder="خريطة" />
+</section>
+<section><h2>الفوتر</h2><input id="footer" /></section>
 
-    <section>
-      <h2>معرض الصور</h2>
-      <div id="gallery" class="gallery"></div>
-      <input type="url" id="imageInput" placeholder="رابط صورة (Cloudinary)" />
-      <button onclick="addImage()">إضافة صورة</button>
-    </section>
+<button onclick="saveChanges()">حفظ البيانات</button>
 
-    <section>
-      <h2>الفيديو</h2>
-      <input id="video" placeholder="رابط الفيديو (Cloudinary)" />
-    </section>
-
-    <section>
-      <h2>روابط التواصل</h2>
-      <input id="facebook" placeholder="رابط فيسبوك" />
-      <input id="whatsapp" placeholder="رابط واتساب" />
-      <input id="email" placeholder="البريد الإلكتروني" />
-      <input id="map" placeholder="رابط Google Maps" />
-    </section>
-
-    <section>
-      <h2>الفوتر</h2>
-      <input id="footer" placeholder="© 2024 Batilieu" />
-    </section>
-
-    <button onclick="saveChanges()">حفظ البيانات</button>
-  </div>
-
-  <script>
-    const firebaseConfig = {
+  </div>  <script>
+    const config = {
       apiKey: "AIzaSyAjZlsPWS2r4O-dJcdyesQgl0yCpuxlEAU",
       authDomain: "batilieu-78862.firebaseapp.com",
-      projectId: "batilieu-78862",
-      storageBucket: "batilieu-78862.firebasestorage.app",
-      messagingSenderId: "99288585792",
-      appId: "1:99288585792:web:f78d3fd0174c6b9f4bf1a5",
-      measurementId: "G-8Z3WZF47YP",
-      databaseURL: "https://batilieu-78862-default-rtdb.firebaseio.com"
+      databaseURL: "https://batilieu-78862-default-rtdb.firebaseio.com",
+      projectId: "batilieu-78862"
     };
-
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(config);
     const db = firebase.database();
     const auth = firebase.auth();
 
-    // تسجيل الدخول
-    function login() {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      auth.signInWithEmailAndPassword(email, password).catch(err => alert("خطأ: " + err.message));
-    }
-
-    function logout() {
-      auth.signOut();
-    }
-
-    // تحميل البيانات بعد الدخول
     auth.onAuthStateChanged(user => {
       if (user) {
-        document.getElementById("loginBox").classList.add("hidden");
-        document.getElementById("adminPanel").classList.remove("hidden");
+        loginBox.classList.add("hidden");
+        adminPanel.classList.remove("hidden");
         loadData();
       } else {
-        document.getElementById("loginBox").classList.remove("hidden");
-        document.getElementById("adminPanel").classList.add("hidden");
+        loginBox.classList.remove("hidden");
+        adminPanel.classList.add("hidden");
       }
     });
+    function login() {
+      auth.signInWithEmailAndPassword(loginEmail.value, loginPassword.value).catch(e => alert(e.message));
+    }
+    function logout() { auth.signOut(); }
 
     function loadData() {
       db.ref("siteData").once("value").then(snapshot => {
-        const data = snapshot.val();
-        document.getElementById("siteName").value = data.siteName;
-        document.getElementById("about").value = data.about;
-        document.getElementById("footer").value = data.footer;
-        document.getElementById("video").value = data.video;
-
-        document.getElementById("facebook").value = data.social.facebook;
-        document.getElementById("whatsapp").value = data.social.whatsapp;
-        document.getElementById("email").value = data.social.email;
-        document.getElementById("map").value = data.social.map;
-
-        data.services.forEach(service => addService(service));
-        data.gallery.forEach(img => addImage(img));
+        const d = snapshot.val();
+        siteName.value = d.siteName;
+        about.value = d.about;
+        footer.value = d.footer;
+        video.value = d.video;
+        facebook.value = d.social.facebook;
+        whatsapp.value = d.social.whatsapp;
+        email.value = d.social.email;
+        map.value = d.social.map;
+        d.services.forEach(s => addService(s));
+        d.gallery.forEach(src => addImage(src));
       });
     }
 
-    function addService(service = { title: "", desc: "" }) {
-      const container = document.getElementById("services");
+    function addService(s = { title: '', desc: '' }) {
       const div = document.createElement("div");
       div.className = "service";
-      div.innerHTML = `
-        <input placeholder="عنوان الخدمة" value="${service.title}" />
-        <textarea placeholder="وصف الخدمة">${service.desc}</textarea>
-        <button onclick="this.parentElement.remove()">حذف</button>
-      `;
-      container.appendChild(div);
+      div.innerHTML = `<input value="${s.title}" /><textarea>${s.desc}</textarea><button onclick="this.parentElement.remove()">حذف</button>`;services.appendChild(div);
+}
+function addImage(src = '') {
+  const img = document.createElement("img");
+  img.src = src || imageInput.value;
+  img.onclick = () => img.remove();
+  gallery.appendChild(img);
+  imageInput.value = '';
+}
+function saveChanges() {
+  const content = {
+    siteName: siteName.value,
+    about: about.value,
+    footer: footer.value,
+    video: video.value,
+    gallery: [...document.querySelectorAll("#gallery img")].map(i => i.src),
+    services: [...services.children].map(s => ({
+      title: s.querySelector("input").value,
+      desc: s.querySelector("textarea").value
+    })),
+    social: {
+      facebook: facebook.value,
+      whatsapp: whatsapp.value,
+      email: email.value,
+      map: map.value
     }
+  };
+  db.ref("siteData").set(content).then(() => alert("تم الحفظ بنجاح"));
+}
 
-    function addImage(src = "") {
-      const gallery = document.getElementById("gallery");
-      const url = src || document.getElementById("imageInput").value;
-      if (!url) return;
-      const img = document.createElement("img");
-      img.src = url;
-      img.title = "انقر للحذف";
-      img.onclick = () => img.remove();
-      gallery.appendChild(img);
-      document.getElementById("imageInput").value = "";
-    }
-
-    function saveChanges() {
-      const data = {
-        siteName: document.getElementById("siteName").value,
-        about: document.getElementById("about").value,
-        footer: document.getElementById("footer").value,
-        video: document.getElementById("video").value,
-        gallery: Array.from(document.querySelectorAll("#gallery img")).map(img => img.src),
-        services: Array.from(document.getElementById("services").children).map(el => ({
-          title: el.querySelector("input").value,
-          desc: el.querySelector("textarea").value
-        })),
-        social: {
-          facebook: document.getElementById("facebook").value,
-          whatsapp: document.getElementById("whatsapp").value,
-          email: document.getElementById("email").value,
-          map: document.getElementById("map").value
-        }
-      };
-      db.ref("siteData").set(data).then(() => alert("تم الحفظ بنجاح"));
-    }
   </script>
-
 </body>
 </html>
