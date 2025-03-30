@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لوحة تحكم Batilieu</title>
   <style>
-    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
-    section { background: #222; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    body { font-family: sans-serif; background-color: #111; color: #fff; padding: 20px; }
+    section { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
     input, textarea, button { width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 5px; }
-    input, textarea { background-color: #333; color: white; }
-    button { background: #3498db; color: white; cursor: pointer; }
-    .gallery img { width: 100px; margin: 5px; border-radius: 5px; cursor: pointer; }
-    .service { margin-bottom: 10px; }
+    input, textarea { background-color: #333; color: #fff; }
+    button { background-color: #3498db; color: white; cursor: pointer; margin-top: 15px; }
+    button:hover { background-color: #2980b9; }
+    .gallery img { width: 120px; margin: 5px; border-radius: 5px; cursor: pointer; }
+    .service { border-bottom: 1px solid #555; margin-bottom: 15px; padding-bottom: 10px; }
   </style>
 </head>
 <body>
 
-  <h1>لوحة التحكم</h1>
+  <script>
+    const PASSWORD = "batilieu123";
+    if (prompt("أدخل كلمة المرور للدخول إلى لوحة التحكم:") !== PASSWORD) {
+      alert("كلمة المرور غير صحيحة!");
+      window.location.href = "/";
+    }
+  </script>
+
+  <h1>لوحة تحكم موقع Batilieu</h1>
 
   <section>
     <h2>اسم الموقع</h2>
-    <input id="siteName" placeholder="Batilieu">
+    <input type="text" id="siteName" placeholder="اسم الموقع" />
   </section>
 
   <section>
     <h2>عن الشركة</h2>
-    <textarea id="about" rows="4"></textarea>
+    <textarea id="about" rows="4" placeholder="نص عن الشركة"></textarea>
   </section>
 
   <section>
@@ -37,77 +46,106 @@
   <section>
     <h2>معرض الصور</h2>
     <div class="gallery" id="gallery"></div>
-    <input type="file" onchange="uploadMedia(this, 'image')">
+    <input type="file" onchange="uploadMedia(this, 'image')" />
   </section>
 
   <section>
     <h2>الفيديو</h2>
     <video id="video" controls width="300"></video>
-    <input type="file" onchange="uploadMedia(this, 'video')">
+    <input type="file" onchange="uploadMedia(this, 'video')" />
   </section>
 
   <section>
-    <h2>الفوتر</h2>
-    <input id="footer" placeholder="مثال: © 2024 Batilieu">
+    <h2>روابط التواصل</h2>
+    <input type="url" id="facebook" placeholder="رابط فيسبوك" />
+    <input type="url" id="whatsapp" placeholder="رابط واتساب" />
+    <input type="email" id="email" placeholder="البريد الإلكتروني" />
+    <input type="url" id="map" placeholder="رابط خريطة Google" />
   </section>
 
-  <button onclick="saveChanges()">تحميل ملف data.json</button>
+  <section>
+    <h2>حقوق الفوتر</h2>
+    <input type="text" id="footer" placeholder="مثال: © 2024 Batilieu" />
+  </section>
+
+  <button onclick="saveChanges()">حفظ التعديلات وتحميل data.json</button>
 
   <script>
-    const CLOUD_NAME = "droa7sy8o";
-    const UPLOAD_PRESET = "unsigned_preset";
+    const CLOUD_NAME = "droa7sy8o"; // غيّرها إلى اسم حسابك في Cloudinary
+    const UPLOAD_PRESET = "unsigned_preset"; // غيّرها إذا كنت أنشأت preset مختلف
 
-    function addService(service = { title: '', desc: '' }) {
-      const div = document.createElement('div');
-      div.className = 'service';
+    function addService(service = { title: "", desc: "" }) {
+      const container = document.getElementById("services");
+      const div = document.createElement("div");
+      div.className = "service";
       div.innerHTML = `
-        <input placeholder="عنوان الخدمة" value="${service.title}">
+        <input placeholder="عنوان الخدمة" value="${service.title}" />
         <textarea placeholder="وصف الخدمة">${service.desc}</textarea>
         <button onclick="this.parentElement.remove()">حذف</button>
       `;
-      document.getElementById('services').appendChild(div);
+      container.appendChild(div);
     }
 
     function uploadMedia(input, type) {
       const file = input.files[0];
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
 
       fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
-        method: 'POST',
+        method: "POST",
         body: formData
       })
       .then(res => res.json())
       .then(data => {
         if (type === 'image') {
-          const img = document.createElement('img');
+          const img = document.createElement("img");
           img.src = data.secure_url;
           img.onclick = () => img.remove();
-          document.getElementById('gallery').appendChild(img);
+          document.getElementById("gallery").appendChild(img);
         } else {
-          document.getElementById('video').src = data.secure_url;
+          document.getElementById("video").src = data.secure_url;
         }
       });
     }
 
     function saveChanges() {
-      const siteName = document.getElementById('siteName').value;
-      const about = document.getElementById('about').value;
-      const footer = document.getElementById('footer').value;
-      const video = document.getElementById('video').src;
-      const gallery = Array.from(document.querySelectorAll('#gallery img')).map(img => img.src);
-      const services = Array.from(document.querySelectorAll('#services .service')).map(s => ({
-        title: s.querySelector('input').value,
-        desc: s.querySelector('textarea').value
+      const siteName = document.getElementById("siteName").value;
+      const about = document.getElementById("about").value;
+      const footer = document.getElementById("footer").value;
+      const video = document.getElementById("video").src;
+      const galleryImgs = Array.from(document.getElementById("gallery").getElementsByTagName("img"));
+      const gallery = galleryImgs.map(img => img.src);
+      const serviceEls = document.getElementById("services").children;
+      const services = Array.from(serviceEls).map(el => ({
+        title: el.querySelector("input").value,
+        desc: el.querySelector("textarea").value
       }));
 
-      const result = { siteName, about, footer, video, gallery, services };
-      const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'data.json';
-      link.click();
+      const social = {
+        facebook: document.getElementById("facebook").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        email: document.getElementById("email").value,
+        map: document.getElementById("map").value
+      };
+
+      const result = {
+        siteName,
+        about,
+        footer,
+        video,
+        gallery,
+        services,
+        social
+      };
+
+      const json = JSON.stringify(result, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "data.json";
+      a.click();
     }
   </script>
 
