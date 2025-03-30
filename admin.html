@@ -5,45 +5,69 @@
   <title>لوحة تحكم Batilieu</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
     body { font-family: sans-serif; background-color: #111; color: #fff; padding: 20px; }
-    section { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
+    section, .login-box { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
     input, textarea, button { width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 5px; }
     input, textarea { background-color: #333; color: #fff; }
     button { background-color: #3498db; color: white; cursor: pointer; margin-top: 15px; }
     button:hover { background-color: #2980b9; }
     .gallery img { width: 120px; margin: 5px; border-radius: 5px; cursor: pointer; }
     .service { border-bottom: 1px solid #555; margin-bottom: 15px; padding-bottom: 10px; }
+    .hidden { display: none; }
   </style>
 </head>
-<body>  <h1>لوحة تحكم موقع Batilieu</h1>  <section>
-    <h2>اسم الموقع</h2>
-    <input type="text" id="siteName" placeholder="اسم الموقع" />
-  </section>  <section>
-    <h2>عن الشركة</h2>
-    <textarea id="about" rows="4" placeholder="نص عن الشركة"></textarea>
-  </section>  <section>
-    <h2>الخدمات</h2>
-    <div id="services"></div>
-    <button onclick="addService()">+ إضافة خدمة</button>
-  </section>  <section>
-    <h2>معرض الصور</h2>
-    <div class="gallery" id="gallery"></div>
-  </section>  <section>
-    <h2>الفيديو</h2>
-    <input type="url" id="video" placeholder="رابط الفيديو (من Cloudinary)" />
-  </section>  <section>
-    <h2>روابط التواصل</h2>
-    <input type="url" id="facebook" placeholder="رابط فيسبوك" />
-    <input type="url" id="whatsapp" placeholder="رابط واتساب" />
-    <input type="email" id="email" placeholder="البريد الإلكتروني" />
-    <input type="url" id="map" placeholder="رابط خريطة Google" />
-  </section>  <section>
-    <h2>حقوق الفوتر</h2>
-    <input type="text" id="footer" placeholder="مثال: © 2024 Batilieu" />
-  </section><button onclick="saveChanges()">حفظ البيانات إلى Firebase</button>
+<body>
+  <div id="loginBox" class="login-box">
+    <h2>تسجيل الدخول</h2>
+    <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" />
+    <input type="password" id="loginPassword" placeholder="كلمة المرور" />
+    <button onclick="login()">دخول</button>
+  </div>  <div id="adminPanel" class="hidden">
+    <h1>لوحة تحكم موقع Batilieu</h1>
+    <button onclick="logout()">تسجيل الخروج</button><section>
+  <h2>اسم الموقع</h2>
+  <input type="text" id="siteName" placeholder="اسم الموقع" />
+</section>
 
-  <script>
+<section>
+  <h2>عن الشركة</h2>
+  <textarea id="about" rows="4" placeholder="نص عن الشركة"></textarea>
+</section>
+
+<section>
+  <h2>الخدمات</h2>
+  <div id="services"></div>
+  <button onclick="addService()">+ إضافة خدمة</button>
+</section>
+
+<section>
+  <h2>معرض الصور</h2>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<section>
+  <h2>الفيديو</h2>
+  <input type="url" id="video" placeholder="رابط الفيديو (من Cloudinary)" />
+</section>
+
+<section>
+  <h2>روابط التواصل</h2>
+  <input type="url" id="facebook" placeholder="رابط فيسبوك" />
+  <input type="url" id="whatsapp" placeholder="رابط واتساب" />
+  <input type="email" id="email" placeholder="البريد الإلكتروني" />
+  <input type="url" id="map" placeholder="رابط خريطة Google" />
+</section>
+
+<section>
+  <h2>حقوق الفوتر</h2>
+  <input type="text" id="footer" placeholder="مثال: © 2024 Batilieu" />
+</section>
+
+<button onclick="saveChanges()">حفظ البيانات إلى Firebase</button>
+
+  </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAjZlsPWS2r4O-dJcdyesQgl0yCpuxlEAU",
       authDomain: "batilieu-78862.firebaseapp.com",
@@ -57,6 +81,52 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        loadData();
+      } else {
+        document.getElementById("loginBox").classList.remove("hidden");
+        document.getElementById("adminPanel").classList.add("hidden");
+      }
+    });
+
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      auth.signInWithEmailAndPassword(email, password).catch(err => alert("فشل الدخول: " + err.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    function loadData() {
+      db.ref("siteData").once("value").then(snapshot => {
+        const data = snapshot.val();
+        document.getElementById("siteName").value = data.siteName;
+        document.getElementById("about").value = data.about;
+        document.getElementById("footer").value = data.footer;
+        document.getElementById("video").value = data.video;
+
+        document.getElementById("facebook").value = data.social.facebook;
+        document.getElementById("whatsapp").value = data.social.whatsapp;
+        document.getElementById("email").value = data.social.email;
+        document.getElementById("map").value = data.social.map;
+
+        data.gallery.forEach(src => {
+          const img = document.createElement("img");
+          img.src = src;
+          img.onclick = () => img.remove();
+          document.getElementById("gallery").appendChild(img);
+        });
+
+        data.services.forEach(s => addService(s));
+      });
+    }
 
     function addService(service = { title: "", desc: "" }) {
       const container = document.getElementById("services");
@@ -73,12 +143,12 @@ function saveChanges() {
   const footer = document.getElementById("footer").value;
   const video = document.getElementById("video").value;
 
+  const gallery = Array.from(document.querySelectorAll("#gallery img")).map(img => img.src);
+
   const services = Array.from(document.getElementById("services").children).map(s => ({
     title: s.querySelector("input").value,
     desc: s.querySelector("textarea").value
   }));
-
-  const gallery = Array.from(document.querySelectorAll("#gallery img")).map(img => img.src);
 
   const social = {
     facebook: document.getElementById("facebook").value,
