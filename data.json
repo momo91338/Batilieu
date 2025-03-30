@@ -1,0 +1,28 @@
+{
+  "about": "Nous sommes Batilieu, une entreprise spécialisée dans les travaux de construction et de rénovation avec des standards de qualité élevés.",
+  "services": [
+    {
+      "icon": "fas fa-hammer",
+      "title": "Travaux de construction",
+      "description": "Nous proposons des solutions de construction complètes, des fondations aux finitions, avec un engagement de qualité."
+    },
+    {
+      "icon": "fas fa-tools",
+      "title": "Rénovation et réhabilitation",
+      "description": "Nous rénovons les bâtiments anciens en respectant les normes modernes tout en conservant leur authenticité."
+    },
+    {
+      "icon": "fas fa-paint-roller",
+      "title": "Finitions intérieures et extérieures",
+      "description": "Nous réalisons les finitions, y compris les peintures, les revêtements de sol et les décorations."
+    }
+  ],
+  "gallery": ["3.jpeg", "4.jpg", "5.jpeg"],
+  "video": "1.mp4",
+  "social": {
+    "facebook": "https://www.facebook.com",
+    "whatsapp": "https://wa.me/yourphonenumber",
+    "email": "mailto:youremail@example.com",
+    "map": "https://www.google.com/maps"
+  }
+}
