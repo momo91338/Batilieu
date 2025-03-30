@@ -1,212 +1,131 @@
 <!DOCTYPE html><html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة التحكم | Batilieu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم Batilieu</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #f0f0f0;
-      padding: 20px;
-    }
-    h2, h3 { color: #ffffff; }
-    label { font-weight: bold; display: block; margin-top: 15px; color: #ccc; }
-    input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-      box-sizing: border-box;
-    }
-    input[type="file"] {
-      background-color: transparent;
-    }
-    button {
-      background-color: #3498db;
-      color: white;
-      cursor: pointer;
-      transition: background 0.3s;
-      border: none;
-    }
-    button:hover {
-      background-color: #2980b9;
-    }
-    .service-block {
-      background-color: #1f1f1f;
-      border: 1px solid #333;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-    .gallery-preview img {
-      width: 100px;
-      margin: 5px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    body { font-family: sans-serif; background-color: #111; color: #fff; padding: 20px; }
+    section { margin-bottom: 30px; padding: 20px; background-color: #222; border-radius: 8px; }
+    input, textarea, button { width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 5px; }
+    input, textarea { background-color: #333; color: #fff; }
+    button { background-color: #3498db; color: white; cursor: pointer; margin-top: 15px; }
+    button:hover { background-color: #2980b9; }
+    .gallery img { width: 120px; margin: 5px; border-radius: 5px; }
+    .service { border-bottom: 1px solid #555; margin-bottom: 15px; padding-bottom: 10px; }
   </style>
+</head>
+<body>
   <script>
     const PASSWORD = "batilieu123";
-    const REPO = "momo91338/Batilieu";
-    const FILE = "data.json";
-    const TOKEN = "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";
+    if (prompt("أدخل كلمة المرور للدخول إلى لوحة التحكم:") !== PASSWORD) {
+      alert("كلمة المرور غير صحيحة!");
+      window.location.href = "/";
+    }
+  </script>  <h1>لوحة تحكم موقع Batilieu</h1>  <section>
+    <h2>اسم الموقع</h2>
+    <input type="text" id="siteName" placeholder="اسم الموقع" />
+  </section>  <section>
+    <h2>عن الشركة</h2>
+    <textarea id="about" rows="4" placeholder="نص عن الشركة"></textarea>
+  </section>  <section>
+    <h2>الخدمات</h2>
+    <div id="services"></div>
+    <button onclick="addService()">+ إضافة خدمة</button>
+  </section>  <section>
+    <h2>معرض الصور</h2>
+    <div class="gallery" id="gallery"></div>
+    <input type="file" onchange="uploadMedia(this, 'image')" />
+  </section>  <section>
+    <h2>الفيديو</h2>
+    <video id="video" controls width="300"></video>
+    <input type="file" onchange="uploadMedia(this, 'video')" />
+  </section>  <section>
+    <h2>حقوق الفوتر</h2>
+    <input type="text" id="footer" placeholder="مثال: © 2024 Batilieu" />
+  </section><button onclick="saveChanges()">حفظ التعديلات</button>
+
+  <script>
     const CLOUD_NAME = "droa7sy8o";
-    const UPLOAD_PRESET = "unsigned_preset";window.onload = function () {
-  const pass = prompt("ادخل كلمة المرور:");
-  if (pass !== PASSWORD) {
-    alert("كلمة المرور غير صحيحة!");
-    window.location.href = "/";
-  } else {
-    loadData();
-  }
-};
+    const UPLOAD_PRESET = "unsigned_preset";
 
-function addServiceBlock(service = {}) {
-  const container = document.getElementById("services");
-  const block = document.createElement("div");
-  block.className = "service-block";
-  block.innerHTML = `
-    <label>عنوان الخدمة:</label>
-    <input type="text" value="${service.title || ""}" class="s-title">
-    <label>أيقونة (مثال: fas fa-hammer):</label>
-    <input type="text" value="${service.icon || ""}" class="s-icon">
-    <label>وصف الخدمة:</label>
-    <textarea class="s-desc">${service.description || ""}</textarea>
-    <button onclick="this.parentElement.remove()">حذف الخدمة</button>
+    const data = {
+      siteName: "Batilieu",
+      about: "نحن شركة مقاولات...",
+      services: [
+        { title: "خدمة 1", desc: "وصف 1" },
+        { title: "خدمة 2", desc: "وصف 2" }
+      ],
+      gallery: [],
+      video: "",
+      footer: "© 2024 Batilieu"
+    };
+
+    window.onload = () => {
+      document.getElementById("siteName").value = data.siteName;
+      document.getElementById("about").value = data.about;
+      document.getElementById("footer").value = data.footer;
+      data.services.forEach(service => addService(service));
+    };
+
+    function addService(service = { title: "", desc: "" }) {
+      const container = document.getElementById("services");
+      const div = document.createElement("div");
+      div.className = "service";
+      div.innerHTML = `
+        <input placeholder="عنوان الخدمة" value="${service.title}" />
+        <textarea placeholder="وصف الخدمة">${service.desc}</textarea><button onclick="this.parentElement.remove()">حذف</button>
   `;
-  container.appendChild(block);
+  container.appendChild(div);
 }
 
-function loadData() {
-  fetch(`https://raw.githubusercontent.com/${REPO}/main/${FILE}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("siteName").value = data.siteName || "";
-      document.getElementById("logo").value = data.logo || "";
-      document.getElementById("about").value = data.about || "";
-      document.getElementById("video").value = data.video || "";
-      document.getElementById("footer").value = data.footer || "";
-      document.getElementById("facebook").value = data.social.facebook || "";
-      document.getElementById("whatsapp").value = data.social.whatsapp || "";
-      document.getElementById("email").value = data.social.email || "";
-      document.getElementById("map").value = data.social.map || "";
-
-      data.gallery.forEach(url => addGalleryImage(url));
-      data.services.forEach(service => addServiceBlock(service));
-    });
-}
-
-function saveData() {
-  const siteName = document.getElementById("siteName").value;
-  const logo = document.getElementById("logo").value;
-  const about = document.getElementById("about").value;
-  const video = document.getElementById("video").value;
-  const footer = document.getElementById("footer").value;
-  const facebook = document.getElementById("facebook").value;
-  const whatsapp = document.getElementById("whatsapp").value;
-  const email = document.getElementById("email").value;
-  const map = document.getElementById("map").value;
-
-  const galleryImgs = document.querySelectorAll(".gallery-preview img");
-  const gallery = Array.from(galleryImgs).map(img => img.src);
-
-  const serviceBlocks = document.querySelectorAll(".service-block");
-  const services = Array.from(serviceBlocks).map(block => ({
-    title: block.querySelector(".s-title").value,
-    icon: block.querySelector(".s-icon").value,
-    description: block.querySelector(".s-desc").value
-  }));
-
-  const finalData = {
-    siteName,
-    logo,
-    about,
-    video,
-    gallery,
-    footer,
-    services,
-    social: { facebook, whatsapp, email, map }
-  };
-
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalData, null, 2))));
-
-  fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
-    method: "GET",
-    headers: { "Authorization": `token ${TOKEN}` }
-  })
-  .then(res => res.json())
-  .then(file => {
-    fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: "تحديث بيانات الموقع",
-        content: content,
-        sha: file.sha
-      })
-    })
-    .then(() => alert("تم الحفظ بنجاح!"))
-    .catch(() => alert("حدث خطأ أثناء الحفظ."));
-  });
-}
-
-function uploadToCloudinary(fileInput, targetField, previewTarget) {
-  const file = fileInput.files[0];
+function uploadMedia(input, type) {
+  const file = input.files[0];
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", UPLOAD_PRESET);
-
-  fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+  fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
     method: "POST",
     body: formData
   })
   .then(res => res.json())
   .then(data => {
-    document.getElementById(targetField).value = data.secure_url;
-    if (previewTarget) document.getElementById(previewTarget).src = data.secure_url;
-    else addGalleryImage(data.secure_url);
-    alert("تم رفع الملف بنجاح!");
-  })
-  .catch(() => alert("فشل رفع الملف"));
+    if (type === 'image') {
+      const img = document.createElement("img");
+      img.src = data.secure_url;
+      img.onclick = () => img.remove();
+      document.getElementById("gallery").appendChild(img);
+    } else {
+      const video = document.getElementById("video");
+      video.src = data.secure_url;
+    }
+  });
 }
 
-function addGalleryImage(url) {
-  const img = document.createElement("img");
-  img.src = url;
-  img.title = "اضغط للحذف";
-  img.onclick = () => img.remove();
-  document.getElementById("gallery-preview").appendChild(img);
+function saveChanges() {
+  const siteName = document.getElementById("siteName").value;
+  const about = document.getElementById("about").value;
+  const footer = document.getElementById("footer").value;
+  const video = document.getElementById("video").src;
+  const galleryImgs = Array.from(document.getElementById("gallery").getElementsByTagName("img"));
+  const gallery = galleryImgs.map(img => img.src);
+  const serviceEls = document.getElementById("services").children;
+  const services = Array.from(serviceEls).map(el => ({
+    title: el.querySelector("input").value,
+    desc: el.querySelector("textarea").value
+  }));
+
+  const result = {
+    siteName,
+    about,
+    footer,
+    video,
+    gallery,
+    services
+  };
+  console.log("تم الحفظ:", result);
+  alert("تم حفظ التعديلات (عرض فقط في الكونسول الآن)");
 }
 
   </script>
-</head>
-<body>
-  <h2>لوحة تحكم موقع Batilieu</h2>
-  <label>اسم الموقع:</label>
-  <input type="text" id="siteName" />
-  <label>رابط صورة اللوجو:</label>
-  <input type="text" id="logo" />
-  <input type="file" onchange="uploadToCloudinary(this, 'logo')" />
-  <label>عن الشركة:</label>
-  <textarea id="about" rows="4"></textarea>  <h3>الخدمات</h3>
-  <div id="services"></div>
-  <button onclick="addServiceBlock()">+ إضافة خدمة جديدة</button><label>رابط الفيديو:</label> <input type="text" id="video" /> <input type="file" onchange="uploadToCloudinary(this, 'video', 'video-preview')" /> <video id="video-preview" controls style="width:100%; max-width:400px; margin-top:10px;"></video>
-
-  <h3>صور المعرض:</h3>
-  <div id="gallery-preview" class="gallery-preview" style="display:flex; flex-wrap:wrap;"></div>
-  <input type="file" multiple onchange="Array.from(this.files).forEach(file => uploadToCloudinary({ files: [file] }))" /><label>حقوق الفوتر:</label> <input type="text" id="footer" />
-
-  <h3>روابط التواصل الاجتماعي</h3>
-  <input type="text" id="facebook" placeholder="رابط Facebook" />
-  <input type="text" id="whatsapp" placeholder="رابط WhatsApp" />
-  <input type="text" id="email" placeholder="رابط البريد الإلكتروني" />
-  <input type="text" id="map" placeholder="رابط Google Maps" /><br><br> <button onclick="saveData()">حفظ التعديلات</button>
-
 </body>
 </html>
