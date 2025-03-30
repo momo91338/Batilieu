@@ -3,7 +3,9 @@
 <head>
   <title>Admin | Modifier site Batilieu</title>
   <script>
+    // كلمة السر للدخول - غيّرها إذا حبيت
     const PASSWORD = "batilieu123";
+
     function login() {
       const pass = prompt("Entrez le mot de passe:");
       if (pass !== PASSWORD) {
@@ -11,6 +13,7 @@
         window.location.href = "/";
       }
     }
+
     window.onload = login;
   </script>
 </head>
@@ -20,18 +23,24 @@
   <button onclick="saveData()">Enregistrer</button>
 
   <script>
-    const REPO = "yourusername/yourrepo"; // ← غيّره باسمك الحقيقي
+    // مستودع GitHub الخاص بك
+    const REPO = "momo91338/Batilieu";
     const FILE = "data.json";
-    const TOKEN = "199124"; // ← توكن GitHub الشخصي
 
+    // توكن GitHub الشخصي (غيّره عندك فقط، لا تنشره للعامة)
+    const TOKEN = "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"; // ← ضعه هنا
+
+    // تحميل البيانات من الملف
     fetch(`https://raw.githubusercontent.com/${REPO}/main/${FILE}`)
       .then(res => res.text())
       .then(text => {
         document.getElementById("json-data").value = text;
       });
 
+    // حفظ البيانات إلى GitHub
     function saveData() {
       const content = btoa(unescape(encodeURIComponent(document.getElementById("json-data").value)));
+
       fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
         method: "GET",
         headers: {
@@ -47,15 +56,15 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: "Mise à jour du contenu",
+            message: "Mise à jour du contenu via admin.html",
             content: content,
             sha: file.sha
           })
         })
-        .then(() => alert("Mise à jour réussie !"))
+        .then(() => alert("Contenu mis à jour avec succès !"))
         .catch(() => alert("Erreur lors de l'enregistrement."));
       });
     }
   </script>
 </body>
-</html>
+  </html
