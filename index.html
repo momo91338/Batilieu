@@ -1,154 +1,194 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Partenariat Construction | Entreprise Batilieu</title>  <meta name="description" content="Batilieu est une entreprise de construction spécialisée dans les projets immobiliers, les finitions et le génie civil avec des standards de qualité élevés.">
-  <meta name="keywords" content="partenariat construction, bâtiment, projets immobiliers, investissement, finitions, génie civil, entreprises de construction, développement immobilier, travaux électriques, gestion de projet">  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background: #333;
-      color: white;
-      padding: 20px;
-    }
-    header img {
-      width: 150px;
-    }
-    section {
-      padding: 20px;
-    }
-    .services {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .service {
-      background-color: #f3f3f3;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      text-align: left;
-    }
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-    .gallery img {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 10px;
-    }
-    .video iframe, .video video {
-      width: 100%;
-      max-width: 500px;
-    }
-    .social-icons {
-      text-align: center;
-      padding: 20px;
-    }
-    .icons-container {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .social-icon {
-      font-size: 36px;
-      color: #333;
-      text-decoration: none;
-      padding: 10px;
-      border-radius: 50%;
-      background-color: #f3f3f3;
-    }
-    footer {
-      background: #222;
-      color: white;
-      padding: 10px;
-      margin-top: 20px;
-    }
-  </style></head>
-<body>  <header>
-    <img src="1.png" alt="Logo Batilieu">
-    <h1 id="siteName">Batilieu</h1>
-  </header>  <section>
-    <h2>À propos de nous</h2>
-    <p id="about-text">Chargement...</p>
-  </section>  <section class="services">
-    <h2>Nos services</h2>
-    <div id="services"></div>
-  </section>  <section class="gallery">
-    <h2>Galerie photos</h2>
-  </section>  <section class="video">
-    <h2>Vidéos</h2>
-    <video controls>
-      <source src="" type="video/mp4">
-      Votre navigateur ne supporte pas la lecture de vidéos.
-    </video>
-  </section>  <section class="social-icons">
-    <h3>Suivez-nous et contactez-nous</h3>
-    <div class="icons-container">
-      <a class="social-icon" href="#"><i class="fab fa-facebook-square"></i></a>
-      <a class="social-icon" href="#"><i class="fab fa-whatsapp"></i></a>
-      <a class="social-icon" href="#"><i class="fas fa-envelope"></i></a>
-      <a class="social-icon" href="#"><i class="fas fa-map-marker-alt"></i></a>
-    </div>
-  </section>  <footer>
-    <p id="footer">© 2024 Tous droits réservés - Batilieu</p>
-  </footer>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAjZlsPWS2r4O-dJcdyesQgl0yCpuxlEAU",
-      authDomain: "batilieu-78862.firebaseapp.com",
-      projectId: "batilieu-78862",
-      storageBucket: "batilieu-78862.firebasestorage.app",
-      messagingSenderId: "99288585792",
-      appId: "1:99288585792:web:f78d3fd0174c6b9f4bf1a5",
-      measurementId: "G-8Z3WZF47YP",
-      databaseURL: "https://batilieu-78862-default-rtdb.firebaseio.com"
-    };
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partenariat Construction | Entreprise Batilieu</title>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    <!-- Optimisation SEO -->
+    <meta name="description" content="Batilieu est une entreprise de construction spécialisée dans les projets immobiliers, les finitions et le génie civil avec des standards de qualité élevés.">
+    <meta name="keywords" content="partenariat construction, bâtiment, projets immobiliers, investissement, finitions, génie civil, entreprises de construction, développement immobilier, travaux électriques, gestion de projet">
+    
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-    db.ref("siteData").once("value").then(snapshot => {
-      const data = snapshot.val();
-      document.getElementById("siteName").textContent = data.siteName;
-      document.getElementById("about-text").textContent = data.about;
-      document.getElementById("footer").textContent = data.footer;
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            direction: ltr;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 20px;
+        }
+        header img {
+            width: 150px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        section {
+            padding: 20px;
+        }
 
-      const servicesContainer = document.getElementById("services");
-      data.services.forEach(service => {
-        const div = document.createElement("div");
-        div.className = "service";
-        div.innerHTML = `<i class="${service.icon || ''} fa-2x"></i>
-                         <h3>${service.title}</h3>
-                         <p>${service.desc}</p>`;
-        servicesContainer.appendChild(div);
-      });
+        /* Services */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .service {
+            background-color: #f3f3f3;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        .service h3 {
+            color: #333;
+        }
+        .service p {
+            font-size: 16px;
+            color: #555;
+        }
 
-      const gallery = document.querySelector(".gallery");
-      data.gallery.forEach(src => {
-        const img = document.createElement("img");
-        img.src = src;
-        gallery.appendChild(img);
-      });
+        /* Galerie */
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 10px;
+        }
 
-      document.querySelector(".video video source").src = data.video;
-      document.querySelector(".video video").load();
+        /* Vidéo */
+        .video iframe, .video video {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border: none;
+        }
 
-      const icons = document.querySelectorAll(".social-icon");
-      icons[0].href = data.social.facebook;
-      icons[1].href = data.social.whatsapp;
-      icons[2].href = data.social.email;
-      icons[3].href = data.social.map;
-    });
-  </script></body>
+        /* Réseaux sociaux */
+        .social-icons {
+            text-align: center;
+            padding: 20px;
+        }
+        .icons-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .social-icon {
+            font-size: 36px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: #f3f3f3;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .social-icon:hover {
+            color: #fff;
+            background-color: #3498db;
+            transform: translateY(-5px);
+        }
+
+        /* Footer */
+        footer {
+            background: #222;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 768px) {
+            .services {
+                grid-template-columns: 1fr;
+            }
+            .gallery img {
+                max-width: 100%;
+            }
+            .icons-container {
+                flex-direction: row;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="1.png" alt="Logo Batilieu">
+        <h1>Batilieu</h1>
+    </header>
+
+    <section>
+        <h2>À propos de nous</h2>
+        <p>Nous sommes Batilieu, une entreprise spécialisée dans les travaux de construction et de rénovation avec des standards de qualité élevés.</p>
+    </section>
+
+    <section class="services">
+        <h2>Nos services</h2>
+        <div class="service">
+            <i class="fas fa-hammer fa-2x"></i>
+            <h3>Travaux de construction</h3>
+            <p>Nous proposons des solutions de construction complètes, des fondations aux finitions, avec un engagement de qualité.</p>
+        </div>
+        <div class="service">
+            <i class="fas fa-tools fa-2x"></i>
+            <h3>Rénovation et réhabilitation</h3>
+            <p>Nous rénovons les bâtiments anciens en respectant les normes modernes tout en conservant leur authenticité.</p>
+        </div>
+        <div class="service">
+            <i class="fas fa-paint-roller fa-2x"></i>
+            <h3>Finitions intérieures et extérieures</h3>
+            <p>Nous réalisons les finitions, y compris les peintures, les revêtements de sol et les décorations.</p>
+        </div>
+    </section>
+
+    <section class="gallery">
+        <h2>Galerie photos</h2>
+        <img src="3.jpeg" alt="Photo 1">
+        <img src="4.jpg" alt="Photo 2">
+        <img src="5.jpeg" alt="Photo 3">
+    </section>
+
+    <section class="video">
+        <h2>Vidéos</h2>
+        <video controls>
+            <source src="2.mp4" type="video/mp4">
+            Votre navigateur ne supporte pas la lecture de vidéos.
+        </video>
+    </section>
+
+    <section class="social-icons">
+        <h3>Suivez-nous et contactez-nous 👇</h3>
+        <div class="icons-container">
+            <a href="https://www.facebook.com" target="_blank" class="social-icon"><i class="fab fa-facebook-square"></i></a>
+            <a href="https://wa.me/yourphonenumber" target="_blank" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+            <a href="mailto:youremail@example.com" target="_blank" class="social-icon"><i class="fas fa-envelope"></i></a>
+            <a href="https://www.google.com/maps" target="_blank" class="social-icon"><i class="fas fa-map-marker-alt"></i></a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2024 Tous droits réservés - Batilieu</p>
+    </footer>
+
+</body>
 </html>
