@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html><html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Batilieu | Partenariat Construction</title>
   <meta name="description" content="Batilieu est une entreprise de construction spécialisée dans les projets immobiliers, les finitions et le génie civil avec des standards de qualité élevés.">
   <meta name="keywords" content="partenariat construction, bâtiment, projets immobiliers, investissement, finitions, génie civil, entreprises de construction, développement immobilier, travaux électriques, gestion de projet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; background: #f9f9f9; }
     header { background: #333; color: white; padding: 20px; }
     header img { width: 150px; }
@@ -26,37 +19,27 @@
     .icons-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
     .social-icon { font-size: 36px; color: #333; text-decoration: none; background: #f3f3f3; padding: 10px; border-radius: 50%; }
     footer { background: #222; color: white; padding: 10px; margin-top: 20px; }
-  </style>
-</head>
+  </style></head>
 <body>
-<header>
+  <header>
     <img id="logo" src="" alt="Logo Batilieu">
     <h1 id="siteName">Batilieu</h1>
-  </header>
-
-  <section>
+  </header>  <section>
     <h2>À propos de nous</h2>
     <p id="aboutText">Chargement...</p>
-  </section>
-
-  <section class="services">
+  </section>  <section class="services">
     <h2>Nos services</h2>
     <div id="servicesContainer"></div>
-  </section>
-<section class="gallery">
+  </section>  <section class="gallery">
     <h2>Galerie photos</h2>
     <div id="galleryContainer"></div>
-  </section>
-
-  <section class="video">
+  </section>  <section class="video">
     <h2>Vidéo</h2>
     <video id="videoPlayer" controls>
       <source id="videoSource" src="" type="video/mp4">
       Votre navigateur ne supporte pas la lecture de vidéos.
     </video>
-  </section>
-
-  <section class="social-icons">
+  </section>  <section class="social-icons">
     <h3>Suivez-nous et contactez-nous</h3>
     <div class="icons-container">
       <a id="facebook" class="social-icon" target="_blank"><i class="fab fa-facebook-square"></i></a>
@@ -64,75 +47,54 @@
       <a id="email" class="social-icon" target="_blank"><i class="fas fa-envelope"></i></a>
       <a id="map" class="social-icon" target="_blank"><i class="fas fa-map-marker-alt"></i></a>
     </div>
-  </section>
-
-  <footer>
+  </section>  <footer>
     <p id="footerText">© 2024 Tous droits réservés - Batilieu</p>
-  </footer>
-<script>
-  // إعداد Firebase
- 
+  </footer>  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1WIjzBZ0UPdB7ngFl6CngtOgyymmTN_0",
+      authDomain: "batilieu-2bbd3.firebaseapp.com",
+      projectId: "batilieu-2bbd3",
+      storageBucket: "batilieu-2bbd3.appspot.com",
+      messagingSenderId: "258256684530",
+      appId: "1:258256684530:web:dc56f010b4ade32e47976b",
+      measurementId: "G-CBFJ2MCEPR"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
- const firebaseConfig = {
-  apiKey: "AIzaSyC1WIjzBZ0UPdB7ngFl6CngtOgyymmTN_0",
-  authDomain: "batilieu-2bbd3.firebaseapp.com",
-  projectId: "batilieu-2bbd3",
-  storageBucket: "batilieu-2bbd3.appspot.com",
-  messagingSenderId: "258256684530",
-  appId: "1:258256684530:web:dc56f010b4ade32e47976b",
-  measurementId: "G-CBFJ2MCEPR"
-};
-firebase.initializeApp(firebaseConfig);
- 
+    db.ref("siteData").once("value").then(snapshot => {
+      const data = snapshot.val();
+      if (!data) return;
 
- firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+      document.getElementById("siteName").textContent = data.siteName || "Batilieu";
+      document.getElementById("logo").src = data.logo || "";
+      document.getElementById("aboutText").textContent = data.about || "";
 
-  // جلب البيانات من Firebase
-  db.ref("siteData").once("value").then(snapshot => {
-    const data = snapshot.val();
-    if (!data) return;
+      const servicesContainer = document.getElementById("servicesContainer");
+      (data.services || []).forEach(service => {
+        const div = document.createElement("div");
+        div.className = "service";
+        div.innerHTML = `<h3>${service.title}</h3><p>${service.description}</p>`;
+        servicesContainer.appendChild(div);
+      });
 
-    // اسم الموقع + لوجو
-    document.getElementById("siteName").textContent = data.siteName || "Batilieu";
-    document.getElementById("logo").src = data.logo || "";
+      const gallery = document.getElementById("galleryContainer");
+      (data.gallery || []).forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Photo du projet Batilieu";
+        gallery.appendChild(img);
+      });
 
-    // عن الشركة
-    document.getElementById("aboutText").textContent = data.about || "";
+      document.getElementById("videoSource").src = data.video || "";
+      document.getElementById("videoPlayer").load();
 
-    // الخدمات
-    const servicesContainer = document.getElementById("servicesContainer");
-    (data.services || []).forEach(service => {
-      const div = document.createElement("div");
-      div.className = "service";
-      div.innerHTML = `
-        <h3>${service.title}</h3>
-        <p>${service.description}</p>
-      `;
-      servicesContainer.appendChild(div);
+      document.getElementById("facebook").href = data.social?.facebook || "#";
+      document.getElementById("whatsapp").href = data.social?.whatsapp || "#";
+      document.getElementById("email").href = "mailto:" + (data.social?.email || "");
+      document.getElementById("map").href = data.social?.map || "#";
+
+      document.getElementById("footerText").textContent = data.footer || "";
     });
-
-    // المعرض
-    const gallery = document.getElementById("galleryContainer");
-    (data.gallery || []).forEach(url => {
-      const img = document.createElement("img");
-      img.src = url;
-      gallery.appendChild(img);
-    });
-
-    // الفيديو
-    document.getElementById("videoSource").src = data.video || "";
-    document.getElementById("videoPlayer").load();
-
-    // الروابط الاجتماعية
-    document.getElementById("facebook").href = data.social?.facebook || "#";
-    document.getElementById("whatsapp").href = data.social?.whatsapp || "#";
-    document.getElementById("email").href = "mailto:" + (data.social?.email || "");
-    document.getElementById("map").href = data.social?.map || "#";
-
-    // الفوتر
-    document.getElementById("footerText").textContent = data.footer || "";
-  });
-</script>
-</body>
+  </script></body>
 </html>
