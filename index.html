@@ -2,15 +2,15 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تحليل السوق مع Binance - 50 شمعة واختيار الفريم</title>
+    <title>تحليل السوق مع Binance - إشارات نصية</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial; background: linear-gradient(to right, #2c3e50, #3498db); color: white; text-align: center; padding: 20px; }
         h1 { font-size: 2.5em; }
         select, button { padding: 10px; margin: 10px; border-radius: 5px; border: none; }
         button { background-color: #1abc9c; color: white; cursor: pointer; }
-        canvas { max-width: 90%; background-color: white; border-radius: 10px; padding: 10px; margin: 20px auto; display: block; }
-        #recommendation { font-size: 1.5em; margin-top: 20px; }
+        canvas { width: 100% !important; height: 600px !important; background-color: white; border-radius: 10px; padding: 10px; margin: 20px auto; display: block; }
+        #recommendation { font-size: 1.8em; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -79,15 +79,15 @@
             const upper = bbMa + (2 * stdDev);
             const lower = bbMa - (2 * stdDev);
 
-            // تحديد الإشارات الجديدة وإضافتها للمصفوفة العالمية
+            // تحديد الإشارات الجديدة
             for (let i = 0; i < closes.length; i++) {
                 const xLabel = `شمعة ${i + 1}`;
                 const isBuyExist = buySignalsGlobal.find(p => p.x === xLabel);
                 const isSellExist = sellSignalsGlobal.find(p => p.x === xLabel);
                 if (macd[i] > 0 && closes[i] > upper && !isBuyExist) {
-                    buySignalsGlobal.push({ x: xLabel, y: closes[i] });
+                    buySignalsGlobal.push({ x: xLabel, y: closes[i], index: i });
                 } else if (macd[i] < 0 && closes[i] < lower && !isSellExist) {
-                    sellSignalsGlobal.push({ x: xLabel, y: closes[i] });
+                    sellSignalsGlobal.push({ x: xLabel, y: closes[i], index: i });
                 }
             }
 
@@ -119,27 +119,35 @@
                         { label: 'الإغلاق', data: closes, borderColor: 'blue', fill: false },
                         { label: 'MA', data: Array(closes.length).fill(ma), borderColor: 'orange', borderDash: [5,5], fill: false },
                         { label: 'Bollinger Upper', data: Array(closes.length).fill(upper), borderColor: 'green', borderDash: [2,2], fill: false },
-                        { label: 'Bollinger Lower', data: Array(closes.length).fill(lower), borderColor: 'red', borderDash: [2,2], fill: false },
-                        {
-                            label: 'إشارة شراء',
-                            data: buySignalsGlobal.map(p => p.y),
-                            pointBackgroundColor: 'lime',
-                            pointRadius: 6,
-                            pointStyle: 'triangle',
-                            showLine: false
-                        },
-                        {
-                            label: 'إشارة بيع',
-                            data: sellSignalsGlobal.map(p => p.y),
-                            pointBackgroundColor: 'red',
-                            pointRadius: 6,
-                            pointStyle: 'triangle',
-                            showLine: false
-                        }
+                        { label: 'Bollinger Lower', data: Array(closes.length).fill(lower), borderColor: 'red', borderDash: [2,2], fill: false }
                     ]
                 },
                 options: {
-                    plugins: { legend: { position: 'top' } },
+                    plugins: {
+                        legend: { position: 'top' },
+                        annotation: {
+                            annotations: [
+                                ...buySignalsGlobal.map(p => ({
+                                    type: 'label',
+                                    xValue: p.index,
+                                    yValue: p.y,
+                                    backgroundColor: 'lime',
+                                    content: ['BUY'],
+                                    font: { size: 14, weight: 'bold' },
+                                    color: 'black'
+                                })),
+                                ...sellSignalsGlobal.map(p => ({
+                                    type: 'label',
+                                    xValue: p.index,
+                                    yValue: p.y,
+                                    backgroundColor: 'red',
+                                    content: ['SELL'],
+                                    font: { size: 14, weight: 'bold' },
+                                    color: 'white'
+                                }))
+                            ]
+                        }
+                    },
                     scales: { y: { beginAtZero: false } }
                 }
             });
