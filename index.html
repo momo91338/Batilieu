@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تحليل السوق مع بيانات حقيقية</title>
+    <title>تحليل السوق مع بيانات حقيقية من Binance</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial; text-align: center; padding: 20px; }
@@ -13,7 +13,7 @@
 </head>
 <body>
     <h1>تحليل السوق مع بيانات حقيقية</h1>
-    <p>سيتم قراءة بيانات آخر 6 شموع لعملة البيتكوين من CoinGecko</p>
+    <p>قراءة بيانات آخر 6 شموع لعملة البيتكوين/USDT من Binance</p>
     <button onclick="fetchData()">بدء التحليل</button>
     <h2 id="recommendation"></h2>
     <canvas id="chart"></canvas>
@@ -21,17 +21,14 @@
     <script>
         async function fetchData() {
             try {
-                // استخدام Proxy لحل مشكلة CORS
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const apiUrl = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=hourly';
-                const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                // Binance API: 6 شموع بمدة ساعة (أو يمكنك تغييرها)
+                const response = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=6');
                 const data = await response.json();
-                
-                // قراءة آخر 6 شموع
-                const prices = data.prices.slice(-6).map(p => p[1]);
-                const volumes = data.total_volumes.slice(-6).map(v => v[1]);
-                
-                analyze(prices, volumes);
+
+                const closes = data.map(candle => parseFloat(candle[4])); // الإغلاق
+                const volumes = data.map(candle => parseFloat(candle[5])); // الحجم
+
+                analyze(closes, volumes);
             } catch (error) {
                 document.getElementById('recommendation').innerText = "❌ حدث خطأ أثناء جلب البيانات. حاول مجددًا.";
                 console.error(error);
@@ -39,10 +36,8 @@
         }
 
         function analyze(closes, volumes) {
-            // المتوسط المتحرك
             const ma = closes.reduce((a,b) => a+b) / closes.length;
 
-            // مؤشر RSI
             let gains = 0, losses = 0;
             for (let i = 1; i < closes.length; i++) {
                 let diff = closes[i] - closes[i-1];
@@ -54,7 +49,6 @@
             const rs = avgGain / (avgLoss || 1);
             const rsi = 100 - (100 / (1 + rs));
 
-            // تحليل الاتجاه
             let trend = 0;
             for (let i = 1; i < closes.length; i++) {
                 if (closes[i] > closes[i-1]) trend++;
@@ -72,7 +66,6 @@
 
             document.getElementById('recommendation').innerText = recommendation;
 
-            // رسم الشارت
             const ctx = document.getElementById('chart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
