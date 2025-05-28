@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تحليل السوق مع Binance - RSI مضاف</title>
+    <title>تحليل السوق مع Binance - 50 شمعة واختيار الفريم</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial; background: linear-gradient(to right, #2c3e50, #3498db); color: white; text-align: center; padding: 20px; }
@@ -15,27 +15,34 @@
 </head>
 <body>
     <h1>تحليل السوق مع Binance</h1>
-    <p>اختر العملة:</p>
+    <p>اختر العملة والفريم:</p>
     <select id="symbolSelect">
         <option value="BTCUSDC">BTC/USDC</option>
         <option value="DOGEUSDC">DOGE/USDC</option>
+    </select>
+    <select id="timeframeSelect">
+        <option value="1m">1 دقيقة</option>
+        <option value="5m" selected>5 دقائق</option>
+        <option value="15m">15 دقيقة</option>
+        <option value="1h">1 ساعة</option>
     </select>
     <br>
     <button onclick="fetchData()">تحديث يدوي</button>
     <h2 id="recommendation">🔄 جارٍ التحميل...</h2>
     <canvas id="chart"></canvas>
-    <canvas id="rsiChart"></canvas>
     <audio id="alertSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
     <script>
         let chartInstance = null;
-        let rsiChartInstance = null;
         let lastRecommendation = "";
+        let buySignalsGlobal = [];
+        let sellSignalsGlobal = [];
 
         async function fetchData() {
             try {
                 const symbol = document.getElementById("symbolSelect").value;
-                const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=5m&limit=100`);
+                const interval = document.getElementById("timeframeSelect").value;
+                const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=50`);
                 const data = await response.json();
 
                 const closes = data.map(c => parseFloat(c[4]));
@@ -53,10 +60,6 @@
         function analyze(closes, highs, lows, volumes, symbol) {
             const ma = closes.reduce((a, b) => a + b) / closes.length;
 
-            // RSI
-            const rsi = calculateRSI(closes, 14);
-
-            // MACD
             const ema = (data, period) => {
                 const k = 2 / (period + 1);
                 let emaArray = [data[0]];
@@ -68,10 +71,7 @@
             const ema12 = ema(closes, 12);
             const ema26 = ema(closes, 26);
             const macd = ema12.map((v, i) => v - ema26[i]);
-            const macdSignal = ema(macd.slice(26), 9);
-            const macdCurrent = macd[macd.length - 1] - (macdSignal[macdSignal.length - 1] || 0);
 
-            // Bollinger Bands
             const period = 20;
             const slice = closes.slice(-period);
             const bbMa = slice.reduce((a, b) => a + b) / period;
@@ -79,12 +79,24 @@
             const upper = bbMa + (2 * stdDev);
             const lower = bbMa - (2 * stdDev);
 
+            // تحديد الإشارات الجديدة وإضافتها للمصفوفة العالمية
+            for (let i = 0; i < closes.length; i++) {
+                const xLabel = `شمعة ${i + 1}`;
+                const isBuyExist = buySignalsGlobal.find(p => p.x === xLabel);
+                const isSellExist = sellSignalsGlobal.find(p => p.x === xLabel);
+                if (macd[i] > 0 && closes[i] > upper && !isBuyExist) {
+                    buySignalsGlobal.push({ x: xLabel, y: closes[i] });
+                } else if (macd[i] < 0 && closes[i] < lower && !isSellExist) {
+                    sellSignalsGlobal.push({ x: xLabel, y: closes[i] });
+                }
+            }
+
             let recommendation = "⏸️ انتظر (لا اتجاه واضح)";
             let color = "#f1c40f";
-            if (macdCurrent > 0 && closes[closes.length - 1] > upper) {
+            if (buySignalsGlobal.length > 0) {
                 recommendation = "✅ اشترِ (" + symbol + ")";
                 color = "lime";
-            } else if (macdCurrent < 0 && closes[closes.length - 1] < lower) {
+            } else if (sellSignalsGlobal.length > 0) {
                 recommendation = "🔻 بع (" + symbol + ")";
                 color = "red";
             }
@@ -107,51 +119,34 @@
                         { label: 'الإغلاق', data: closes, borderColor: 'blue', fill: false },
                         { label: 'MA', data: Array(closes.length).fill(ma), borderColor: 'orange', borderDash: [5,5], fill: false },
                         { label: 'Bollinger Upper', data: Array(closes.length).fill(upper), borderColor: 'green', borderDash: [2,2], fill: false },
-                        { label: 'Bollinger Lower', data: Array(closes.length).fill(lower), borderColor: 'red', borderDash: [2,2], fill: false }
+                        { label: 'Bollinger Lower', data: Array(closes.length).fill(lower), borderColor: 'red', borderDash: [2,2], fill: false },
+                        {
+                            label: 'إشارة شراء',
+                            data: buySignalsGlobal.map(p => p.y),
+                            pointBackgroundColor: 'lime',
+                            pointRadius: 6,
+                            pointStyle: 'triangle',
+                            showLine: false
+                        },
+                        {
+                            label: 'إشارة بيع',
+                            data: sellSignalsGlobal.map(p => p.y),
+                            pointBackgroundColor: 'red',
+                            pointRadius: 6,
+                            pointStyle: 'triangle',
+                            showLine: false
+                        }
                     ]
                 },
-                options: { plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: false } } }
+                options: {
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: false } }
+                }
             });
-
-            const rsiCtx = document.getElementById('rsiChart').getContext('2d');
-            if (rsiChartInstance) rsiChartInstance.destroy();
-            rsiChartInstance = new Chart(rsiCtx, {
-                type: 'line',
-                data: {
-                    labels: rsi.map((_, i) => `RSI ${i + 1}`),
-                    datasets: [
-                        { label: 'RSI', data: rsi, borderColor: 'purple', fill: false },
-                        { label: '70', data: Array(rsi.length).fill(70), borderColor: 'green', borderDash: [4,2], fill: false },
-                        { label: '30', data: Array(rsi.length).fill(30), borderColor: 'red', borderDash: [4,2], fill: false }
-                    ]
-                },
-                options: { plugins: { legend: { position: 'top' } }, scales: { y: { min: 0, max: 100 } } }
-            });
-        }
-
-        function calculateRSI(closes, period) {
-            let gains = [], losses = [];
-            for (let i = 1; i < closes.length; i++) {
-                const diff = closes[i] - closes[i - 1];
-                if (diff > 0) gains.push(diff); else losses.push(-diff);
-            }
-            const avgGain = gains.reduce((a,b)=>a+b,0) / period || 0;
-            const avgLoss = losses.reduce((a,b)=>a+b,0) / period || 1;
-            let rsiArray = [];
-            let rs = avgGain / avgLoss;
-            rsiArray.push(100 - (100 / (1 + rs)));
-            for (let i = period; i < closes.length; i++) {
-                const diff = closes[i] - closes[i - 1];
-                let gain = diff > 0 ? diff : 0;
-                let loss = diff < 0 ? -diff : 0;
-                rs = ((avgGain * (period - 1)) + gain) / ((avgLoss * (period - 1)) + loss);
-                rsiArray.push(100 - (100 / (1 + rs)));
-            }
-            return rsiArray;
         }
 
         fetchData();
         setInterval(fetchData, 60000);
     </script>
 </body>
-    </html>
+</html>
