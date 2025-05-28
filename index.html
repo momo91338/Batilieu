@@ -20,13 +20,22 @@
 
     <script>
         async function fetchData() {
-            // الحصول على بيانات آخر 6 ساعات للبيتكوين من CoinGecko
-            const response = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=hourly');
-            const data = await response.json();
-            const prices = data.prices.slice(-6).map(p => p[1]);
-            const volumes = data.total_volumes.slice(-6).map(v => v[1]);
-
-            analyze(prices, volumes);
+            try {
+                // استخدام Proxy لحل مشكلة CORS
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const apiUrl = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=hourly';
+                const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+                const data = await response.json();
+                
+                // قراءة آخر 6 شموع
+                const prices = data.prices.slice(-6).map(p => p[1]);
+                const volumes = data.total_volumes.slice(-6).map(v => v[1]);
+                
+                analyze(prices, volumes);
+            } catch (error) {
+                document.getElementById('recommendation').innerText = "❌ حدث خطأ أثناء جلب البيانات. حاول مجددًا.";
+                console.error(error);
+            }
         }
 
         function analyze(closes, volumes) {
