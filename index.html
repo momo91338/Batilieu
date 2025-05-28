@@ -2,33 +2,15 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تحليل السوق مع Binance - اختيار العملة</title>
+    <title>تحليل السوق مع Binance - RSI مضاف</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #2c3e50, #3498db);
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 { font-size: 2.5em; margin-bottom: 10px; }
-        p { font-size: 1.2em; margin-bottom: 20px; }
-        select, button {
-            padding: 10px 15px; font-size: 1em; margin-bottom: 10px;
-            border-radius: 5px; border: none;
-        }
-        button {
-            background-color: #1abc9c; color: white; cursor: pointer;
-        }
-        button:hover { background-color: #16a085; }
-        canvas {
-            max-width: 90%; background-color: white;
-            border-radius: 10px; padding: 10px; margin-top: 20px;
-        }
-        #recommendation {
-            font-size: 1.8em; margin-top: 20px;
-        }
+        body { font-family: Arial; background: linear-gradient(to right, #2c3e50, #3498db); color: white; text-align: center; padding: 20px; }
+        h1 { font-size: 2.5em; }
+        select, button { padding: 10px; margin: 10px; border-radius: 5px; border: none; }
+        button { background-color: #1abc9c; color: white; cursor: pointer; }
+        canvas { max-width: 90%; background-color: white; border-radius: 10px; padding: 10px; margin: 20px auto; display: block; }
+        #recommendation { font-size: 1.5em; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -42,10 +24,12 @@
     <button onclick="fetchData()">تحديث يدوي</button>
     <h2 id="recommendation">🔄 جارٍ التحميل...</h2>
     <canvas id="chart"></canvas>
+    <canvas id="rsiChart"></canvas>
     <audio id="alertSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
     <script>
         let chartInstance = null;
+        let rsiChartInstance = null;
         let lastRecommendation = "";
 
         async function fetchData() {
@@ -69,16 +53,10 @@
         function analyze(closes, highs, lows, volumes, symbol) {
             const ma = closes.reduce((a, b) => a + b) / closes.length;
 
-            let gains = 0, losses = 0;
-            for (let i = 1; i < closes.length; i++) {
-                let diff = closes[i] - closes[i - 1];
-                if (diff > 0) gains += diff; else losses -= diff;
-            }
-            const avgGain = gains / closes.length;
-            const avgLoss = losses / closes.length;
-            const rs = avgGain / (avgLoss || 1);
-            const rsi = 100 - (100 / (1 + rs));
+            // RSI
+            const rsi = calculateRSI(closes, 14);
 
+            // MACD
             const ema = (data, period) => {
                 const k = 2 / (period + 1);
                 let emaArray = [data[0]];
@@ -93,6 +71,7 @@
             const macdSignal = ema(macd.slice(26), 9);
             const macdCurrent = macd[macd.length - 1] - (macdSignal[macdSignal.length - 1] || 0);
 
+            // Bollinger Bands
             const period = 20;
             const slice = closes.slice(-period);
             const bbMa = slice.reduce((a, b) => a + b) / period;
@@ -110,9 +89,8 @@
                 color = "red";
             }
 
-            const recElement = document.getElementById('recommendation');
-            recElement.innerText = recommendation;
-            recElement.style.color = color;
+            document.getElementById('recommendation').innerText = recommendation;
+            document.getElementById('recommendation').style.color = color;
 
             if (recommendation !== lastRecommendation && (recommendation.includes("اشترِ") || recommendation.includes("بع"))) {
                 document.getElementById('alertSound').play();
@@ -132,15 +110,48 @@
                         { label: 'Bollinger Lower', data: Array(closes.length).fill(lower), borderColor: 'red', borderDash: [2,2], fill: false }
                     ]
                 },
-                options: {
-                    plugins: { legend: { position: 'top' } },
-                    scales: { y: { beginAtZero: false } }
-                }
+                options: { plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: false } } }
             });
+
+            const rsiCtx = document.getElementById('rsiChart').getContext('2d');
+            if (rsiChartInstance) rsiChartInstance.destroy();
+            rsiChartInstance = new Chart(rsiCtx, {
+                type: 'line',
+                data: {
+                    labels: rsi.map((_, i) => `RSI ${i + 1}`),
+                    datasets: [
+                        { label: 'RSI', data: rsi, borderColor: 'purple', fill: false },
+                        { label: '70', data: Array(rsi.length).fill(70), borderColor: 'green', borderDash: [4,2], fill: false },
+                        { label: '30', data: Array(rsi.length).fill(30), borderColor: 'red', borderDash: [4,2], fill: false }
+                    ]
+                },
+                options: { plugins: { legend: { position: 'top' } }, scales: { y: { min: 0, max: 100 } } }
+            });
+        }
+
+        function calculateRSI(closes, period) {
+            let gains = [], losses = [];
+            for (let i = 1; i < closes.length; i++) {
+                const diff = closes[i] - closes[i - 1];
+                if (diff > 0) gains.push(diff); else losses.push(-diff);
+            }
+            const avgGain = gains.reduce((a,b)=>a+b,0) / period || 0;
+            const avgLoss = losses.reduce((a,b)=>a+b,0) / period || 1;
+            let rsiArray = [];
+            let rs = avgGain / avgLoss;
+            rsiArray.push(100 - (100 / (1 + rs)));
+            for (let i = period; i < closes.length; i++) {
+                const diff = closes[i] - closes[i - 1];
+                let gain = diff > 0 ? diff : 0;
+                let loss = diff < 0 ? -diff : 0;
+                rs = ((avgGain * (period - 1)) + gain) / ((avgLoss * (period - 1)) + loss);
+                rsiArray.push(100 - (100 / (1 + rs)));
+            }
+            return rsiArray;
         }
 
         fetchData();
         setInterval(fetchData, 60000);
     </script>
 </body>
-</html>
+    </html>
