@@ -45,13 +45,13 @@
 <body>
   <div class="container">
     <div id="loginSection">
-      <h2>🔐 تسجيل / دخول</h2>
-      <input type="text" id="username" placeholder="اسم المستخدم" />
-      <button onclick="register()">📝 تسجيل جديد</button>
+      <h2>🔐 تسجيل / دخول باستخدام المفتاح الخاص</h2>
+      <button onclick="register()">📝 تسجيل (توليد مفتاح جديد)</button>
+      <input type="text" id="privateKeyInput" placeholder="أدخل مفتاحك الخاص للدخول" />
       <button onclick="login()">🚪 دخول</button>
     </div><div id="app" style="display:none;">
   <h1>🌐 LibreWebChain (P2P)</h1>
-  <p><strong>🔐 مفتاحك العام:</strong></p>
+  <p><strong>🔐 عنوان محفظتك (المفتاح العام):</strong></p>
   <p id="publicKey"></p>
   <button onclick="proveActivity()">✅ أثبت نشاطك</button>
 
@@ -91,27 +91,54 @@
       privateKey = keyPair.privateKey;
       const spki = await crypto.subtle.exportKey('spki', keyPair.publicKey);
       publicKey = btoa(String.fromCharCode(...new Uint8Array(spki)));
+
+      const pk = await crypto.subtle.exportKey("pkcs8", privateKey);
+      const pkBase64 = btoa(String.fromCharCode(...new Uint8Array(pk)));
+      alert("✅ مفتاحك الخاص (احتفظ به لدخولك لاحقًا):\n" + pkBase64);
+    }
+
+    async function importPrivateKey(pkBase64) {
+      const pkRaw = Uint8Array.from(atob(pkBase64), c => c.charCodeAt(0));
+      return await crypto.subtle.importKey(
+        "pkcs8",
+        pkRaw,
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["sign"]
+      );
+    }
+
+    async function derivePublicKey(privKey) {
+      const jwk = await crypto.subtle.exportKey("jwk", privKey);
+      delete jwk.d; // remove private component
+      const pubKey = await crypto.subtle.importKey(
+        "jwk",
+        jwk,
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["verify"]
+      );
+      const spki = await crypto.subtle.exportKey("spki", pubKey);
+      return btoa(String.fromCharCode(...new Uint8Array(spki)));
     }
 
     function register() {
-      const username = document.getElementById("username").value.trim();
-      if (!username) return alert("⚠️ أدخل اسم مستخدم أولاً");
-      generateKeys().then(() => {
-        localStorage.setItem(`user-${username}`, publicKey);
-        alert("✅ تم التسجيل بنجاح. يمكنك الآن الضغط على دخول.");
-      });
+      generateKeys();
     }
 
-    function login() {
-      const username = document.getElementById("username").value.trim();
-      if (!username) return alert("⚠️ أدخل اسم المستخدم");
-      const storedKey = localStorage.getItem(`user-${username}`);
-      if (!storedKey) return alert("❌ المستخدم غير مسجل");
-      publicKey = storedKey;
-      document.getElementById("publicKey").innerText = publicKey.slice(0, 50) + '...';
-      document.getElementById("loginSection").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      startAfterLogin();
+    async function login() {
+      const pkInput = document.getElementById("privateKeyInput").value.trim();
+      if (!pkInput) return alert("⚠️ أدخل المفتاح الخاص");
+      try {
+        privateKey = await importPrivateKey(pkInput);
+        publicKey = await derivePublicKey(privateKey);
+        document.getElementById("publicKey").innerText = publicKey.slice(0, 100) + '...';
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        startAfterLogin();
+      } catch (e) {
+        alert("❌ المفتاح غير صالح");
+      }
     }
 
     async function startAfterLogin() {
